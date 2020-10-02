@@ -25,10 +25,14 @@ fn main() {
     let file = File::open(input).unwrap();
     let reader = BufReader::new(file);
 
+    process_lines(regex, reader)
+}
+
+fn process_lines<T: BufRead + Sized>(regex: Regex, reader: T) {
     for (i, line_) in reader.lines().enumerate() {
         let line = line_.unwrap();
         match regex.find(&line) {
-            Some(_) => println!("{}: {}", i+1, line),
+            Some(_) => println!("{}: {}", i + 1, line),
             None => (),
         }
     }
