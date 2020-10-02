@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::io;
 
 use clap::{App, Arg, ArgMatches};
 use regex::Regex;
@@ -10,11 +11,16 @@ fn main() {
     let pattern = args.value_of("pattern").unwrap();
     let regex = Regex::new(pattern).unwrap();
 
-    let input = args.value_of("input").unwrap();
-    let file = File::open(input).unwrap();
-    let reader = BufReader::new(file);
-
-    process_lines(regex, reader)
+    let input = args.value_of("input").unwrap_or("-");
+    if input == "-" {
+        let stdin = io::stdin();
+        let reader = stdin.lock();
+        process_lines(regex, reader);
+    } else {
+        let f = File::open(input).unwrap();
+        let reader = BufReader::new(f);
+        process_lines(regex, reader);
+    }
 }
 
 fn create_cli_app() -> ArgMatches<'static> {
@@ -28,7 +34,7 @@ fn create_cli_app() -> ArgMatches<'static> {
         .arg(Arg::with_name("input")
             .help("File to search on")
             .takes_value(true)
-            .required(true))
+            .required(false))
         .get_matches()
 }
 
