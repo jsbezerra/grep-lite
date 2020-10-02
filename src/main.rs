@@ -1,11 +1,24 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
-use clap::{App, Arg};
+use clap::{App, Arg, ArgMatches};
 use regex::Regex;
 
 fn main() {
-    let args = App::new("grep-lite")
+    let args = create_cli_app();
+
+    let pattern = args.value_of("pattern").unwrap();
+    let regex = Regex::new(pattern).unwrap();
+
+    let input = args.value_of("input").unwrap();
+    let file = File::open(input).unwrap();
+    let reader = BufReader::new(file);
+
+    process_lines(regex, reader)
+}
+
+fn create_cli_app() -> ArgMatches<'static> {
+    App::new("grep-lite")
         .version("0.1")
         .about("searches for patterns")
         .arg(Arg::with_name("pattern")
@@ -16,16 +29,7 @@ fn main() {
             .help("File to search on")
             .takes_value(true)
             .required(true))
-        .get_matches();
-
-    let pattern = args.value_of("pattern").unwrap();
-    let regex = Regex::new(pattern).unwrap();
-
-    let input = args.value_of("input").unwrap();
-    let file = File::open(input).unwrap();
-    let reader = BufReader::new(file);
-
-    process_lines(regex, reader)
+        .get_matches()
 }
 
 fn process_lines<T: BufRead + Sized>(regex: Regex, reader: T) {
