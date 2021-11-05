@@ -41,9 +41,6 @@ fn create_cli_app() -> ArgMatches<'static> {
 fn process_lines<T: BufRead + Sized>(regex: Regex, reader: T) {
     for (i, line_) in reader.lines().enumerate() {
         let line = line_.unwrap();
-        match regex.find(&line) {
-            Some(_) => println!("{}: {}", i + 1, line),
-            None => (),
-        }
+        if regex.find(&line).is_some() { println!("{}: {}", i + 1, line) }
     }
 }
